@@ -55,7 +55,6 @@ class LED(ABC):
         colour = data[COLOUR]
         f = open(DRIVER_LOCATION, 'w')
         payload = ','.join([self.get_led_id(), str(brightness), style, colour])
-        print(payload)
         print(payload, file=f)
         f.close()
 
@@ -76,14 +75,12 @@ class LED(ABC):
         brightness = max(0, min(100, brightness))
         payload = self._led_state.copy()
         payload.update({BRIGHTNESS: brightness})
-        print(payload)
         self.set_led_state(payload)
 
     def set_colour(self, colour):
         if (colour in self.valid_colours()):
             payload = self._led_state.copy()
             payload.update({COLOUR: colour})
-            print(payload)
             self.set_led_state(payload)
         else:
             print("Attempted to pass invalid colour value")
@@ -92,7 +89,6 @@ class LED(ABC):
         if (style in LED._styles.values()    ):
             payload = self._led_state.copy()
             payload.update({STYLE: style})
-            print(payload)
             self.set_led_state(payload)
         else:
             print("Attempted to pass invalid style value")
