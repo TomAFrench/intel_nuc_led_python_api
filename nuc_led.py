@@ -1,5 +1,9 @@
-
 DRIVER_LOCATION = '/proc/acpi/nuc_led'
+
+LED_ID = 'id'
+BRIGHTNESS = 'brightness'
+STYLE = 'style'
+COLOUR = 'colour'
 
 class LED:
     """
@@ -8,8 +12,10 @@ class LED:
 
     _led_id = None
     _colours = None
-    _styles = {'Always On': 'none','1Hz Blink':'blink_fast', '0.5Hz Blink': 'blink_medium' , "0.25Hz Blink":'blink_slow'
-              ,'1Hz Fade':'fade_fast', '0.5Hz Fade': 'fade_medium' , "0.25Hz Fade":'fade_slow'}
+    _styles = {'Always On': 'none','1Hz Blink':'blink_fast',
+               '0.5Hz Blink': 'blink_medium', '0.25Hz Blink':'blink_slow',
+               '1Hz Fade':'fade_fast', '0.5Hz Fade': 'fade_medium',
+               '0.25Hz Fade':'fade_slow'}
 
     def styles(self):
         return(list(LED._styles.values()))
@@ -28,18 +34,18 @@ class LED:
 
     def turn_off_led(self):
         payload = self._led_state.copy()
-        payload.update({'brightness': 0, 'style': 'none', 'colour': 'off'})
+        payload.update({BRIGHTNESS: 0, STYLE: 'none', COLOUR: 'off'})
         self.set_led_state(payload)
 
     def set_led_state(self, data):
         """
         Writes content of data to DRIVER_LOCATION
         """
-        brightness = data['brightness']
-        style = data['style']
-        colour = data['colour']
+        brightness = data[BRIGHTNESS]
+        style = data[STYLE]
+        colour = data[COLOUR]
         f = open(DRIVER_LOCATION, 'w')
-        payload = self.get_led_id() + ',' + str(brightness) + ',' + style + ',' + colour
+        payload = ','.join([self.get_led_id(), str(brightness), style, colour])
         print(payload)
         print(payload, file=f)
         f.close()
@@ -52,7 +58,9 @@ class LED:
         style = ((text[1]).split(': ')[1].split(' (')[0])
         colour = ((text[2]).split(': ')[1].split(' (')[0]).lower()
 
-        data = {'brightness': int(brightness), 'style': LED._styles[style], 'colour': colour}
+        data = {BRIGHTNESS: int(brightness),
+                STYLE: LED._styles[style],
+                COLOUR: colour}
         return(data)
 
     def valid_colours(self):
@@ -61,14 +69,14 @@ class LED:
     def set_brightness(self, brightness):
         brightness = max(0, min(100, brightness))
         payload = self._led_state.copy()
-        payload.update({'brightness': brightness})
+        payload.update({BRIGHTNESS: brightness})
         print(payload)
         self.set_led_state(payload)
 
     def set_colour(self, colour):
         if (colour in self.valid_colours()):
             payload = self._led_state.copy()
-            payload.update({'colour': colour})
+            payload.update({COLOUR: colour})
             print(payload)
             self.set_led_state(payload)
         else:
@@ -77,7 +85,7 @@ class LED:
     def set_style(self, style):
         if (style in LED._styles.values()    ):
             payload = self._led_state.copy()
-            payload.update({'style': style})
+            payload.update({STYLE: style})
             print(payload)
             self.set_led_state(payload)
         else:
@@ -89,11 +97,12 @@ class RingLED(LED):
     """
 
     _led_id = 'ring'
-    _colours = ["off", "cyan", "pink", "yellow", "blue", "red", "green", "white"]
+    _colours = ["off", "cyan", "pink", "yellow",
+                "blue", "red", "green", "white"]
 
 
     def __init__(self):
-        self._led_state = {'id': RingLED._led_id}
+        self._led_state = {LED_ID: RingLED._led_id}
         self.get_led_state()
 
     def get_led_id(self):
@@ -121,7 +130,7 @@ class PowerLED(LED):
     _colours = ["off", "blue", "amber"]
 
     def __init__(self):
-        self._led_state = {'id': PowerLED.led_id}
+        self._led_state = {LED_ID: PowerLED.led_id}
         self.get_led_state()
 
     def get_led_id(self):
@@ -130,7 +139,6 @@ class PowerLED(LED):
     def valid_colours(self):
         return(PowerLED._colours)
 
-    #def update_led_state(self):
     def _read_led_state(self):
         f = open(DRIVER_LOCATION, 'r')
         state = f.read()
