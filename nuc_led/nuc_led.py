@@ -125,7 +125,7 @@ class PowerLED(LED):
     _colours = ["off", "blue", "amber"]
 
     def __init__(self):
-        self._led_state = {LED_ID: PowerLED.led_id}
+        self._led_state = {LED_ID: PowerLED._led_id}
         self.get_led_state()
 
     def get_led_id(self):
