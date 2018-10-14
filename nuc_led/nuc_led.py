@@ -41,18 +41,14 @@ class LED(ABC):
         self._led_state.update(self._read_led_state())
         return(self._led_state)
 
-    def turn_off_led(self):
-        payload = self._led_state.copy()
-        payload.update({BRIGHTNESS: 0, STYLE: 'none', COLOUR: 'off'})
-        self.set_led_state(payload)
-
     def set_led_state(self, data):
         """
         Writes content of data to DRIVER_LOCATION
         """
-        brightness = data[BRIGHTNESS]
-        style = data[STYLE]
-        colour = data[COLOUR]
+        current_state = self.get_led_state()
+        brightness = data.get(BRIGHTNESS, current_state[BRIGHTNESS])
+        style = data.get(STYLE, current_state[STYLE])
+        colour = data.get(COLOUR, current_state[COLOUR])
         f = open(DRIVER_LOCATION, 'w')
         payload = ','.join([self.get_led_id(), str(brightness), style, colour])
         print(payload, file=f)
@@ -73,25 +69,22 @@ class LED(ABC):
 
     def set_brightness(self, brightness):
         brightness = max(0, min(100, brightness))
-        payload = self._led_state.copy()
-        payload.update({BRIGHTNESS: brightness})
-        self.set_led_state(payload)
+        self.set_led_state({BRIGHTNESS: brightness})
 
     def set_colour(self, colour):
         if (colour in self.valid_colours()):
-            payload = self._led_state.copy()
-            payload.update({COLOUR: colour})
-            self.set_led_state(payload)
+            self.set_led_state({COLOUR: colour})
         else:
             print("Attempted to pass invalid colour value")
 
     def set_style(self, style):
-        if (style in LED._styles.values()    ):
-            payload = self._led_state.copy()
-            payload.update({STYLE: style})
-            self.set_led_state(payload)
+        if (style in LED._styles.values()):
+            self.set_led_state({STYLE: style})
         else:
             print("Attempted to pass invalid style value")
+
+    def turn_off_led(self):
+        self.set_led_state({BRIGHTNESS: 0, STYLE: 'none', COLOUR: 'off'})
 
 class RingLED(LED):
     """
