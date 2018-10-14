@@ -7,6 +7,17 @@ BRIGHTNESS = 'brightness'
 STYLE = 'style'
 COLOUR = 'colour'
 
+
+class ColorIsNotValidException(Exception):
+    def __init__(self, color):
+        super().__init__("Color {0} is not valid color".format(color))
+
+
+class StyleIsNotValidException(Exception):
+    def __init__(self, style):
+        super().__init__("Style {0} is not valid style".format(style))
+
+
 class LED(ABC):
     """
     "Abstract" base class from which to derive RingLED and PowerLED
@@ -14,16 +25,17 @@ class LED(ABC):
 
     _led_id = None
     _colours = None
-    _styles = {'Always On': 'none','1Hz Blink':'blink_fast',
-               '0.5Hz Blink': 'blink_medium', '0.25Hz Blink':'blink_slow',
-               '1Hz Fade':'fade_fast', '0.5Hz Fade': 'fade_medium',
-               '0.25Hz Fade':'fade_slow'}
+    _styles = {'Always On': 'none', '1Hz Blink': 'blink_fast',
+               '0.5Hz Blink': 'blink_medium', '0.25Hz Blink': 'blink_slow',
+               '1Hz Fade': 'fade_fast', '0.5Hz Fade': 'fade_medium',
+               '0.25Hz Fade': 'fade_slow'}
+
     @abstractmethod
     def get_led_id(self):
         pass
 
     def styles(self):
-        return(list(LED._styles.values()))
+        return list(LED._styles.values())
 
     @abstractmethod
     def valid_colours(self):
@@ -39,7 +51,7 @@ class LED(ABC):
         Returns a dict of led state
         """
         self._led_state.update(self._read_led_state())
-        return(self._led_state)
+        return self._led_state
 
     def set_led_state(self, data):
         """
@@ -54,7 +66,7 @@ class LED(ABC):
         print(payload, file=f)
         f.close()
 
-        #update stored state
+        # update stored state
         self.get_led_state()
 
     def _get_state_from_text(self, text):
@@ -65,26 +77,27 @@ class LED(ABC):
         data = {BRIGHTNESS: int(brightness),
                 STYLE: LED._styles[style],
                 COLOUR: colour}
-        return(data)
+        return data
 
     def set_brightness(self, brightness):
         brightness = max(0, min(100, brightness))
         self.set_led_state({BRIGHTNESS: brightness})
 
     def set_colour(self, colour):
-        if (colour in self.valid_colours()):
+        if colour in self.valid_colours():
             self.set_led_state({COLOUR: colour})
         else:
-            print("Attempted to pass invalid colour value")
+            raise ColorIsNotValidException(colour)
 
     def set_style(self, style):
-        if (style in LED._styles.values()):
+        if style in LED._styles.values():
             self.set_led_state({STYLE: style})
         else:
-            print("Attempted to pass invalid style value")
+            raise StyleIsNotValidException(style)
 
     def turn_off_led(self):
         self.set_led_state({BRIGHTNESS: 0, STYLE: 'none', COLOUR: 'off'})
+
 
 class RingLED(LED):
     """
@@ -95,16 +108,15 @@ class RingLED(LED):
     _colours = ["off", "cyan", "pink", "yellow",
                 "blue", "red", "green", "white"]
 
-
     def __init__(self):
         self._led_state = {LED_ID: RingLED._led_id}
         self.get_led_state()
 
     def get_led_id(self):
-        return(RingLED._led_id)
+        return RingLED._led_id
 
     def valid_colours(self):
-        return(RingLED._colours)
+        return RingLED._colours
 
     def _read_led_state(self):
         f = open(DRIVER_LOCATION, 'r')
@@ -112,8 +124,7 @@ class RingLED(LED):
         state = state.split('\n')
         ring_state = state[4:-2]
         f.close()
-        return(self._get_state_from_text(ring_state))
-
+        return self._get_state_from_text(ring_state)
 
 
 class PowerLED(LED):
@@ -129,10 +140,10 @@ class PowerLED(LED):
         self.get_led_state()
 
     def get_led_id(self):
-        return(PowerLED._led_id)
+        return PowerLED._led_id
 
     def valid_colours(self):
-        return(PowerLED._colours)
+        return PowerLED._colours
 
     def _read_led_state(self):
         f = open(DRIVER_LOCATION, 'r')
@@ -140,4 +151,4 @@ class PowerLED(LED):
         state = state.split('\n')
         power_state = state[:3]
         f.close()
-        return(self._get_state_from_text(power_state))
+        return self._get_state_from_text(power_state)
