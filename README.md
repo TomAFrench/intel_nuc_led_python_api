@@ -4,7 +4,7 @@ This is a simple python library for ease of integration and use of the kernel mo
 
 ## Usage
 
-This library exposes two classes RingLED and PowerLED to represent the two leds on the NUC which have methods to control their brightness, colour and style.
+This library exposes two classes RingLED and PowerLED to represent the two leds on the NUC which have methods to control their brightness, color and style.
 
 ### Brightness:
 
@@ -12,7 +12,7 @@ LED brightness may be set using the `set_brightness(level)` method where level m
 
 ### Colour:
 
-LED colour may be set using the `set_colour(color)` where `color` may take the values in the following table
+LED color may be set using the `set_color(new_color)` where `new_color` may take the values in the following table
 
 |LED Color|power|ring|
 |---------|:---:|:--:|
