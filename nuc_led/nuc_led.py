@@ -5,7 +5,7 @@ DRIVER_LOCATION = '/proc/acpi/nuc_led'
 LED_ID = 'id'
 BRIGHTNESS = 'brightness'
 STYLE = 'style'
-COLOUR = 'colour'
+COLOR = 'color'
 
 
 class ColorIsNotValidException(Exception):
@@ -20,11 +20,11 @@ class StyleIsNotValidException(Exception):
 
 class LED(ABC):
     """
-    "Abstract" base class from which to derive RingLED and PowerLED
+    Abstract base class from which to derive RingLED and PowerLED
     """
 
     _led_id = None
-    _colours = None
+    _colors = None
     _styles = {'Always On': 'none', '1Hz Blink': 'blink_fast',
                '0.5Hz Blink': 'blink_medium', '0.25Hz Blink': 'blink_slow',
                '1Hz Fade': 'fade_fast', '0.5Hz Fade': 'fade_medium',
@@ -38,7 +38,7 @@ class LED(ABC):
         return list(LED._styles.values())
 
     @abstractmethod
-    def valid_colours(self):
+    def valid_colors(self):
         pass
 
     @abstractmethod
@@ -60,9 +60,9 @@ class LED(ABC):
         current_state = self.get_led_state()
         brightness = data.get(BRIGHTNESS, current_state[BRIGHTNESS])
         style = data.get(STYLE, current_state[STYLE])
-        colour = data.get(COLOUR, current_state[COLOUR])
+        colour = data.get(COLOR, current_state[COLOR])
         f = open(DRIVER_LOCATION, 'w')
-        payload = ','.join([self.get_led_id(), str(brightness), style, colour])
+        payload = ','.join([self.get_led_id(), str(brightness), style, color])
         print(payload, file=f)
         f.close()
 
@@ -72,22 +72,22 @@ class LED(ABC):
     def _get_state_from_text(self, text):
         brightness = (text[0]).split(': ')[1].split('%')[0]
         style = ((text[1]).split(': ')[1].split(' (')[0])
-        colour = ((text[2]).split(': ')[1].split(' (')[0]).lower()
+        color = ((text[2]).split(': ')[1].split(' (')[0]).lower()
 
         data = {BRIGHTNESS: int(brightness),
                 STYLE: LED._styles[style],
-                COLOUR: colour}
+                COLOR: color}
         return data
 
     def set_brightness(self, brightness):
         brightness = max(0, min(100, brightness))
         self.set_led_state({BRIGHTNESS: brightness})
 
-    def set_colour(self, colour):
-        if colour in self.valid_colours():
-            self.set_led_state({COLOUR: colour})
+    def set_colour(self, color):
+        if color in self.valid_colours():
+            self.set_led_state({COLOR: color})
         else:
-            raise ColorIsNotValidException(colour)
+            raise ColorIsNotValidException(color)
 
     def set_style(self, style):
         if style in LED._styles.values():
@@ -96,7 +96,7 @@ class LED(ABC):
             raise StyleIsNotValidException(style)
 
     def turn_off_led(self):
-        self.set_led_state({BRIGHTNESS: 0, STYLE: 'none', COLOUR: 'off'})
+        self.set_led_state({BRIGHTNESS: 0, STYLE: 'none', COLOR: 'off'})
 
 
 class RingLED(LED):
@@ -105,7 +105,7 @@ class RingLED(LED):
     """
 
     _led_id = 'ring'
-    _colours = ["off", "cyan", "pink", "yellow",
+    _colors = ["off", "cyan", "pink", "yellow",
                 "blue", "red", "green", "white"]
 
     def __init__(self):
@@ -133,7 +133,7 @@ class PowerLED(LED):
     """
 
     _led_id = 'power'
-    _colours = ["off", "blue", "amber"]
+    _colors = ["off", "blue", "amber"]
 
     def __init__(self):
         self._led_state = {LED_ID: PowerLED._led_id}
@@ -143,7 +143,7 @@ class PowerLED(LED):
         return PowerLED._led_id
 
     def valid_colours(self):
-        return PowerLED._colours
+        return PowerLED._colors
 
     def _read_led_state(self):
         f = open(DRIVER_LOCATION, 'r')
