@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 DRIVER_LOCATION = '/proc/acpi/nuc_led'
 
 LED_ID = 'id'
@@ -5,7 +7,7 @@ BRIGHTNESS = 'brightness'
 STYLE = 'style'
 COLOUR = 'colour'
 
-class LED:
+class LED(ABC):
     """
     "Abstract" base class from which to derive RingLED and PowerLED
     """
@@ -16,13 +18,20 @@ class LED:
                '0.5Hz Blink': 'blink_medium', '0.25Hz Blink':'blink_slow',
                '1Hz Fade':'fade_fast', '0.5Hz Fade': 'fade_medium',
                '0.25Hz Fade':'fade_slow'}
+    @abstractmethod
+    def get_led_id(self):
+        pass
 
     def styles(self):
         return(list(LED._styles.values()))
 
+    @abstractmethod
+    def valid_colours(self):
+        pass
+
+    @abstractmethod
     def _read_led_state(self):
-        print("Error")
-        return({})
+        pass
 
     def get_led_state(self):
         """
@@ -62,9 +71,6 @@ class LED:
                 STYLE: LED._styles[style],
                 COLOUR: colour}
         return(data)
-
-    def valid_colours(self):
-        pass
 
     def set_brightness(self, brightness):
         brightness = max(0, min(100, brightness))
