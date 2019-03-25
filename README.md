@@ -1,6 +1,6 @@
 # Intel NUC7i[x]BN and NUC6CAY LED Control
 
-This is a simple python library for ease of integration and use of the kernel module [here](https://gitlab.com/Solije/intel_nuc_led) (forked from original work by [milesp20](https://github.com/milesp20/intel_nuc_led)) designed for Intel NUC7i[x]BN and NUC6CAY kits.
+This is a simple python library for ease of integration and use of the kernel module [here](https://github.com/TomAFrench/intel_nuc_led) (forked from original work by [milesp20](https://github.com/milesp20/intel_nuc_led)) designed for Intel NUC7i[x]BN and NUC6CAY kits.
 
 ## Usage
 
